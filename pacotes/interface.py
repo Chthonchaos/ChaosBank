@@ -507,3 +507,4 @@ class PagarEmprestimo (Base):
         database.registrar_acao(cpf, "pagamento", -valor_quitar, f"Quitação empréstimo #{self.pagamento}")
         messagebox.showinfo("Sucesso", "Empréstimo quitado com sucesso!")
         self.controller.show_frame("PaginaEmprestimos")
+    
