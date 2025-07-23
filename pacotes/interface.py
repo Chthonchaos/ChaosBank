@@ -125,6 +125,22 @@ class Cadastro(Base):
         if not all(dados.values()):
             messagebox.showerror("Erro", "Todos os campos são obrigatórios.")
             return
+        
+        cpf = dados['cpf']
+        if not cpf.isdigit() or len(cpf) != 11:
+            messagebox.showerror("Erro de Cadastro", "CPF inválido. Digite apenas 11 números.")
+            return
+
+        email = dados['email']
+        dominios_validos = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@live.com"]
+        if "@" not in email or not any(email.endswith(dominio) for dominio in dominios_validos):
+            messagebox.showerror("Erro de Cadastro", "Formato de e-mail inválido ou domínio não suportado.")
+            return
+
+        senha = dados['senha']
+        if len(senha) < 6:
+            messagebox.showerror("Erro de Cadastro", "A senha deve ter no mínimo 6 caracteres.")
+            return
 
         try:
             database.registrar_novo_usuario(dados['cpf'], dados['nome'], dados['email'], hash_senha(dados['senha']))
