@@ -9,7 +9,7 @@ import string
 import sqlite3
 from datetime import datetime
 from pacotes import utils
-from pacotes.utils import hash_senha, mask_cpf, gerar_comprovante
+from pacotes.utils import hash_senha, mask_cpf, gerar_comprovante, send_recovery_email
 from pacotes import database
 from pacotes.database import (
     setup_database,
@@ -94,7 +94,7 @@ class Login(Base):
             self.controller.current_user_cpf = user[0]
             self.controller.show_frame("PainelUsuario")
         else:
-            messagebox.showerror("Erro. CPF ou senha inválidos.")
+            messagebox.showerror("Erro", "CPF ou senha inválidos.")
 
 
 class Cadastro(Base):
@@ -131,9 +131,8 @@ class Cadastro(Base):
             database.adicionar_chave_pix(dados['cpf'], 'CPF', dados['cpf'])
             messagebox.showinfo("Sucesso", "Cadastro realizado com sucesso!")
             self.controller.show_frame("Login")
-
         except sqlite3.IntegrityError:
-            messagebox.showerror("Erro. CPF ou Email já cadastrado.")
+            messagebox.showerror("Erro", "CPF ou Email já cadastrado.")
 
 
 class RecuperacaoSenha(Base):
@@ -190,14 +189,14 @@ class RecuperacaoSenha(Base):
         user = database.get_usuario_por_email(self.user_email)
 
         if not user:
-            messagebox.showerror("Erro. E-mail não encontrado.")
+            messagebox.showerror("Erro", "E-mail não encontrado.")
             return
 
         recovery_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
         if send_recovery_email(self.user_email, user[1], recovery_code):
             database.salvar_codigo_recuperacao(self.user_email, recovery_code)
-            messagebox.showinfo("Sucesso. Um código de recuperação foi enviado para seu e-mail.")
+            messagebox.showinfo("Sucesso", "Um código de recuperação foi enviado para seu e-mail.")
             self.frame_email.pack_forget()
             self.frame_code.pack()
 
@@ -211,7 +210,7 @@ class RecuperacaoSenha(Base):
             self.frame_code.pack_forget()
             self.frame_password.pack()
         else:
-            messagebox.showerror("Erro. Código inválido ou expirado.")
+            messagebox.showerror("Erro", "Código inválido ou expirado.")
 
     def resetar_senha(self):
         """
@@ -221,11 +220,11 @@ class RecuperacaoSenha(Base):
         confirm_pass = self.confirm_pass_entry.get()
 
         if new_pass != confirm_pass:
-            messagebox.showerror("Erro. As senhas não coincidem.")
+            messagebox.showerror("Erro", "As senhas não coincidem.")
             return
 
         if len(new_pass) < 6:
-            messagebox.showerror("Erro. A senha deve ter pelo menos 6 caracteres.")
+            messagebox.showerror("Erro", "A senha deve ter pelo menos 6 caracteres.")
             return
 
         database.redefinir_senha(self.user_email, hash_senha(new_pass))
@@ -244,6 +243,9 @@ class PainelUsuario(Base):
             ("Saldo e Extrato", lambda: self.controller.show_frame("Extrato")),
             ("Transferência", lambda: self.controller.show_frame("Transferencia")),
             ("Empréstimos", lambda: self.controller.show_frame("Emprestimo")),
+            ("Área PIX", lambda: self.controller.show_frame("PaginaPix")),
+            ("Cartões Digitais", lambda: self.controller.show_frame("Cartoes")),
+            ("Recarga de Celular", lambda: self.controller.show_frame("Recarga")),
         ]
 
         for texto, comando in botoes:
@@ -352,7 +354,7 @@ class Transferencia(Base):
             self.controller.show_frame("PainelUsuario")
 
         except ValueError:
-            messagebox.showerror("Erro. Valor inválido.")
+            messagebox.showerror("Erro", "Valor inválido.")
 
 class PaginaEmprestimos(Base):
     """
@@ -432,7 +434,7 @@ class Emprestimo(Base):
                 messagebox.showinfo("Aprovado", f"Empréstimo de R$ {valor:.2f} creditado em sua conta!")
                 self.controller.show_frame("PaginaEmprestimos")
         except ValueError:
-            messagebox.showerror("Erro. Valores inválidos.")
+            messagebox.showerror("Erro", "Valores inválidos.")
 
 
 class PagarEmprestimo (Base):
@@ -486,7 +488,7 @@ class PagarEmprestimo (Base):
         
         if self.emprestimo[6] + 1 == self.emprestimo[5]:
             database.quitar_emprestimo(self.pagamento)
-        
+
         messagebox.showinfo("Sucesso", "Parcela paga com sucesso!")
         self.controller.show_frame("PaginaEmprestimos")
 
@@ -507,4 +509,233 @@ class PagarEmprestimo (Base):
         database.registrar_acao(cpf, "pagamento", -valor_quitar, f"Quitação empréstimo #{self.pagamento}")
         messagebox.showinfo("Sucesso", "Empréstimo quitado com sucesso!")
         self.controller.show_frame("PaginaEmprestimos")
+
+class PaginaPix(Base):
+
+    def setup_widgets(self):
+
+        tk.Label(self, text="Área PIX", font=("Arial", 24, "bold"), bg="black", fg="red").pack(pady=(40, 20))
+        tk.Button(self, text="Enviar PIX", command=lambda: self.controller.show_frame("TransferenciaPix"), bg="red", fg="white", font=("Arial", 12), width=25, height=2).pack(pady=10)
+        tk.Button(self, text="Gerenciar Minhas Chaves", command=lambda: self.controller.show_frame("ChavePix"), bg="red", fg="white", font=("Arial", 12), width=25, height=2).pack(pady=10)
+        tk.Button(self, text="Voltar ao Painel", command=lambda: self.controller.show_frame("PainelUsuario"), bg="grey", fg="white", font=("Arial", 10)).pack(pady=(30, 0))
+
+
+class ChavePix(Base):
+
+    def setup_widgets(self):
+        
+        self.main_frame = tk.Frame(self, bg="black")
+        self.main_frame.pack(fill="both", expand=True)
+
+        tk.Button(self, text="Voltar", command=lambda: self.controller.show_frame("PaginaPix"), bg="grey", fg="white").pack(pady=10, side="bottom")
     
+    def on_show(self, data=None):
+        
+        for widget in self.main_frame.winfo_children(): 
+            widget.destroy()
+        
+        cpf = self.controller.current_user_cpf
+        tk.Label(self.main_frame, text="Minhas Chaves PIX", font=("Arial", 20), bg="black", fg="red").pack(pady=10)
+        keys_frame = tk.LabelFrame(self.main_frame, text="Chaves Cadastradas", bg="black", fg="white", padx=10, pady=10)
+        keys_frame.pack(pady=10, padx=10, fill="x")
+        
+        chaves = database.get_chaves_pix(cpf)
+        
+        if not chaves:
+            tk.Label(keys_frame, text="Nenhuma chave cadastrada.", bg="black", fg="white").pack()
+        else:
+            for chave, tipo in chaves:
+                tk.Label(keys_frame, text=f"{tipo}: {chave}", bg="black", fg="lightgrey").pack(anchor="w")
+        
+        register_frame = tk.LabelFrame(self.main_frame, text="Cadastrar Nova Chave", bg="black", fg="white", padx=10, pady=10)
+        register_frame.pack(pady=10, padx=10, fill="x")
+        
+        tk.Button(register_frame, text="Cadastrar E-mail da Conta", command=self.cadastrar_email, bg="red", fg="white").pack(fill="x", pady=2)
+        tk.Button(register_frame, text="Cadastrar CPF da Conta", command=self.cadastrar_cpf, bg="red", fg="white").pack(fill="x", pady=2)
+        tk.Button(register_frame, text="Gerar Chave Aleatória", command=self.gerar_aleatoria, bg="red", fg="white").pack(fill="x", pady=2)
+        
+        celular_frame = tk.Frame(register_frame, bg="black")
+        self.celular_entry = tk.Entry(celular_frame, width=20)
+        self.celular_entry.pack(side="left", fill="x", expand=True, padx=(0,5))
+        
+        tk.Button(celular_frame, text="Salvar Celular", command=self.cadastrar_celular, bg="#c00", fg="white").pack(side="left")
+        celular_frame.pack(fill="x", pady=(5,2))
+
+    def cadastrar_chave(self, chave, tipo):
+        
+        cpf = self.controller.current_user_cpf
+
+        if not chave:
+            messagebox.showerror("Erro", "O campo não pode estar vazio.")
+            return
+        try:
+            database.adicionar_chave_pix(chave, tipo, cpf)
+            messagebox.showinfo("Sucesso", f"Chave '{tipo}' cadastrada com sucesso!")
+            self.on_show()
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Erro", "Esta chave já está cadastrada no sistema.")
+
+    def cadastrar_email(self):
+        
+        self.cadastrar_chave(database.get_usuario(self.controller.current_user_cpf)[2], "E-mail")
+    
+    def cadastrar_cpf(self):
+
+        self.cadastrar_chave(self.controller.current_user_cpf, "CPF")
+
+    def cadastrar_celular(self):
+        
+        celular = self.celular_entry.get()
+
+        if not celular.isdigit() or len(celular) < 10:
+            messagebox.showerror("Erro", "Número de celular inválido.")
+            return
+        self.cadastrar_chave(celular, "Celular")
+    def gerar_aleatoria(self):
+
+        while True:
+            chave = ''.join(random.choices(string.digits, k=6))
+
+            if not database.check_chave_pix_exists(chave):
+                self.cadastrar_chave(chave, "Aleatória")
+                break
+
+
+class TransferenciaPix(Base):
+
+    def setup_widgets(self):
+
+        tk.Label(self, text="Enviar PIX", font=("Arial", 20), bg="black", fg="red").pack(pady=(40,15))
+        tk.Label(self, text="Chave PIX Destino:", bg="black", fg="white").pack()
+        self.chave = tk.Entry(self, width=30)
+        self.chave.pack()
+        
+        tk.Label(self, text="Valor:", bg="black", fg="white").pack()
+        self.valor = tk.Entry(self, width=30)
+        self.valor.pack()
+        
+        tk.Button(self, text="Enviar PIX", command=self.enviar_pix, bg="red", fg="white").pack(pady=10)
+        tk.Button(self, text="Voltar", command=lambda: self.controller.show_frame("PaginaPix"), bg="grey", fg="white").pack()
+    
+    def enviar_pix(self):
+        
+        cpf_origem = self.controller.current_user_cpf
+        chave = self.chave.get()
+        
+        try:
+            valor = float(self.valor.get())
+            
+            if valor <= 0: raise ValueError
+            saldo_origem = database.get_usuario(cpf_origem)[4]
+            
+            if saldo_origem < valor:
+                messagebox.showerror("Erro", "Saldo insuficiente.")
+                return
+            
+            resultado = database.get_pix_destino(chave)
+            
+            if not resultado:
+                messagebox.showerror("Erro", "Chave PIX não encontrada.")
+                return
+            
+            destino_cpf = resultado[0]
+            dest_user = database.get_usuario(destino_cpf)
+            database.atualizar_saldo(cpf_origem, -valor)
+            database.atualizar_saldo(destino_cpf, valor)
+            database.registrar_acao(cpf_origem, "pix_saida", -valor, f"PIX enviado para {dest_user[1]}")
+            database.registrar_acao(destino_cpf, "pix_entrada", valor, f"PIX recebido de {database.get_usuario(cpf_origem)[1]}")
+
+            messagebox.showinfo("Sucesso", "PIX enviado com sucesso.")
+            gerar_comprovante(self, "PIX", valor, cpf_origem, chave)
+
+            self.controller.show_frame("PaginaPix")
+        except ValueError:
+            messagebox.showerror("Erro", "Valor inválido.")
+
+class Cartoes(Base):
+
+    def setup_widgets(self):
+        self.main_frame = tk.Frame(self, bg="black")
+        self.main_frame.pack(fill="both", expand=True)
+        
+        tk.Button(self, text="Voltar", command=lambda: self.controller.show_frame("PainelUsuario"), bg="grey", fg="white").pack(pady=10, side="bottom")
+    
+    def on_show(self, data=None):
+
+        for widget in self.main_frame.winfo_children(): 
+            widget.destroy()
+        
+        cpf = self.controller.current_user_cpf
+        tk.Label(self.main_frame, text="Cartões Digitais", font=("Arial", 20), bg="black", fg="red").pack(pady=10)
+        cartoes = database.get_cartoes(cpf)
+        
+        if not cartoes:
+            tk.Label(self.main_frame, text="Nenhum cartão gerado.", bg="black", fg="white").pack(pady=10)
+        else:
+            for cartao in cartoes:
+                num, val, cvv, tipo, limite = cartao
+                frame_cartao = tk.Frame(self.main_frame, bg="#2a2a2a", pady=10)
+                texto = f"Tipo: {tipo.title()}\nFinal: {num[-4:]}\nValidade: {val} | CVV: {cvv}"
+                
+                if tipo == 'credito':
+                    texto += f"\nLimite: R$ {limite:.2f}"
+                
+                tk.Label(frame_cartao, text=texto, bg="#2a2a2a", fg="white", justify="left").pack(padx=10)
+                frame_cartao.pack(fill="x", padx=20, pady=5)
+        
+        tk.Button(self.main_frame, text="Gerar Novo Cartão de Crédito", command=lambda: self.gerar_cartao('credito'), bg="red", fg="white").pack(pady=10)
+    
+    def gerar_cartao(self, tipo):
+
+        cpf = self.controller.current_user_cpf
+        numero = "4" + "".join(random.choices(string.digits, k=15))
+        validade = f"{random.randint(1,12):02d}/{random.randint(26, 30)}"
+        cvv = "".join(random.choices(string.digits, k=3))
+        limite = 500.0
+        
+        try:
+            database.registrar_cartao(cpf, numero, validade, cvv, tipo, limite)
+            messagebox.showinfo("Sucesso", "Novo cartão de crédito gerado!")
+            self.on_show() 
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Erro", "Não foi possível gerar o cartão. Tente novamente.")
+
+
+class Recarga(Base):
+    
+    def setup_widgets(self):
+
+        tk.Label(self, text="Recarga de Celular", font=("Arial", 20), bg="black", fg="red").pack(pady=(40,15))
+        tk.Label(self, text="Número com DDD (só dígitos):", bg="black", fg="white").pack()
+        self.numero_cel = tk.Entry(self, width=30)
+        self.numero_cel.pack()
+
+        tk.Label(self, text="Valor da Recarga:", bg="black", fg="white").pack()
+        self.valor = tk.Entry(self, width=30)
+        self.valor.pack()
+
+        tk.Button(self, text="Recarregar", command=self.recarregar, bg="red", fg="white").pack(pady=10)
+        tk.Button(self, text="Voltar", command=lambda: self.controller.show_frame("PainelUsuario"), bg="grey", fg="white").pack()
+    
+    def recarregar(self):
+
+        cpf = self.controller.current_user_cpf
+        numero = self.numero_cel.get()
+
+        try:
+            valor = float(self.valor.get())
+            
+            if not numero.isdigit() or len(numero) not in [10, 11] or valor <= 0:
+                raise ValueError
+            saldo_usuario = database.get_usuario(cpf)[4]
+            
+            if saldo_usuario < valor:
+                messagebox.showerror("Erro", "Saldo insuficiente.")
+                return
+            
+            database.atualizar_saldo(cpf, -valor)
+            database.registrar_acao(cpf, "recarga", -valor, f"Recarga de celular para o número {numero}")
+            messagebox.showinfo("Sucesso", f"Recarga de R$ {valor:.2f} realizada para o número {numero}!")
+            self.controller.show_frame("PainelUsuario")
+        except ValueError:
+            messagebox.showerror("Erro", "Número ou valor inválido.")

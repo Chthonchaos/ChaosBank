@@ -17,7 +17,12 @@ from pacotes.interface import (
     Transferencia, 
     Emprestimo, 
     PagarEmprestimo,
-    PaginaEmprestimos
+    PaginaEmprestimos,
+    PaginaPix,
+    ChavePix,
+    TransferenciaPix,
+    Cartoes,
+    Recarga
 )
 from pacotes import utils
 
@@ -46,7 +51,8 @@ class ChaosBank(tk.Tk):
 
         frame_classes = [
             PaginaInicial, Login, Cadastro, RecuperacaoSenha, PainelUsuario,
-            Extrato, Transferencia, Emprestimo, PagarEmprestimo, PaginaEmprestimos
+            Extrato, Transferencia, Emprestimo, PagarEmprestimo, PaginaEmprestimos, 
+            PaginaPix, ChavePix, TransferenciaPix, Cartoes, Recarga,
         ]
         
         for F_class in frame_classes:
@@ -81,7 +87,8 @@ if __name__ == '__main__':
     """
     database.setup_database()
     app = ChaosBank()
-    
+
+    """Função para quando fechar a janela."""
     def on_closing():
 
         if messagebox.askokcancel("Sair", "Deseja sair do Chaos Bank?"):
