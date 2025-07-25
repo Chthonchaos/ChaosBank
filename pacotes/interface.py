@@ -1,7 +1,7 @@
-#Arquivo: interface.py
-#Interface gráfica
+# Arquivo: interface.py
+# Interface gráfica
 
-#Bibliotecas e Módulos
+# Bibliotecas e Módulos
 import tkinter as tk
 from tkinter import messagebox, ttk, Toplevel, Frame, Label, Button
 import random
@@ -42,8 +42,8 @@ class Base(tk.Frame):
         self.controller = controller
         self.setup_widgets()
 
-    def setup_widgets(self): pass #Função para configuração dos widgets.
-    def on_show(self, data=None): pass #Função chamada ao exibir a página.
+    def setup_widgets(self): pass # Função para configuração dos widgets nas telas.
+    def on_show(self, data=None): pass # Função para exibir as páginas.
 
 class PaginaInicial(Base):
     """
@@ -66,7 +66,9 @@ class Login(Base):
     Página de login do aplicativo.
     """
     def setup_widgets(self):
-
+    """
+    Configura os widgets da página de login...
+    """
         tk.Label(self, text="Login", font=("Arial", 20), bg="black", fg="red").pack(pady=(40,15))
 
         tk.Label(self, text="CPF:", bg="black", fg="white").pack()
@@ -121,28 +123,46 @@ class Cadastro(Base):
         Registra um novo usuário.
         """
         dados = {campo: entry.get() for campo, entry in self.entradas.items()}
-
+        
         if not all(dados.values()):
+            """        
+            Verifica se todos os campos foram preenchidos.
+            """
             messagebox.showerror("Erro", "Todos os campos são obrigatórios.")
             return
         
         cpf = dados['cpf']
-        if not cpf.isdigit() or len(cpf) != 11:
+
+        if not cpf.isdigit() or len(cpf) != 11: 
+            """
+            Verifica se o CPF tem o formato válido, ou seja, possui apenas números e 11 dígitos.
+            """
             messagebox.showerror("Erro de Cadastro", "CPF inválido. Digite apenas 11 números.")
             return
 
         email = dados['email']
         dominios_validos = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@live.com"]
+
         if "@" not in email or not any(email.endswith(dominio) for dominio in dominios_validos):
+            """
+            Verifica se o e-mail contém um dos domínios válidos.
+            """
             messagebox.showerror("Erro de Cadastro", "Formato de e-mail inválido ou domínio não suportado.")
             return
 
         senha = dados['senha']
+        
         if len(senha) < 6:
+            """
+            Verifica se a senha no mínimo 6 caracteres.
+            """
             messagebox.showerror("Erro de Cadastro", "A senha deve ter no mínimo 6 caracteres.")
             return
 
         try:
+            """
+            Adiciona o novo usuário no banco de dados.
+            """
             database.registrar_novo_usuario(dados['cpf'], dados['nome'], dados['email'], hash_senha(dados['senha']))
             database.adicionar_chave_pix(dados['cpf'], 'CPF', dados['cpf'])
             messagebox.showinfo("Sucesso", "Cadastro realizado com sucesso!")
@@ -205,6 +225,9 @@ class RecuperacaoSenha(Base):
         user = database.get_usuario_por_email(self.user_email)
 
         if not user:
+            """
+            Verifica se o e-mail do usuário existe no banco de dados.
+            """
             messagebox.showerror("Erro", "E-mail não encontrado.")
             return
 
@@ -236,10 +259,16 @@ class RecuperacaoSenha(Base):
         confirm_pass = self.confirm_pass_entry.get()
 
         if new_pass != confirm_pass:
+            """
+            Verifica se as senhas são iguais.
+            """
             messagebox.showerror("Erro", "As senhas não coincidem.")
             return
 
         if len(new_pass) < 6:
+            """
+            Verifica se a nova senha tem o mínimo de 6 caracteres.
+            """
             messagebox.showerror("Erro", "A senha deve ter pelo menos 6 caracteres.")
             return
 
@@ -249,7 +278,7 @@ class RecuperacaoSenha(Base):
 
 class PainelUsuario(Base):
     """
-    Painel do usuário.
+    Painel Principal do Banco.
     """
     def setup_widgets(self):
 
@@ -308,9 +337,15 @@ class Extrato(Base):
         extrato = database.get_extrato(cpf)
         
         if not extrato:
+            """
+            Verifica se há transações no extrato.
+            """
             tk.Label(scrollable_frame, text="Nenhuma transação encontrada.", bg="black", fg="white").pack()
         
         else:
+            """
+            Exibe as transações no extrato caso existam.
+            """
             for tipo, valor, descricao, data_str in extrato:
                 data_f = datetime.strptime(data_str.split('.')[0], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%y %H:%M')
                 cor = "lightgreen" if valor > 0 else "lightcoral"
@@ -352,11 +387,17 @@ class Transferencia(Base):
             saldo_origem = database.get_usuario(cpf_origem)[4]
 
             if saldo_origem < valor:
+                """
+                Verifica se o saldo é suficiente para a transferência.
+                """
                 messagebox.showerror("Erro", "Saldo insuficiente.")
                 return
             dest_user = database.get_usuario(destino_cpf)
 
             if not dest_user:
+                """
+                Verifica se o destinatário da transferência existe.
+                """
                 messagebox.showerror("Erro", "Destinatário não encontrado.")
                 return
 
@@ -391,10 +432,15 @@ class PaginaEmprestimos(Base):
         emprestimos = database.get_emprestimos_ativos(cpf)
         
         if not emprestimos:
+            """
+            Verifica se o usuário possui empréstimos ativos.
+            """
             tk.Label(self.main_frame, text="Você não possui empréstimos ativos.", bg="black", fg="white").pack(pady=10)
         
         else:
-            
+            """
+            Exibe os empréstimos ativos do usuário caso existam.
+            """
             for emp in emprestimos:
                 id_emp, total, pago, p_totais, p_pagas = emp
                 frame_emp = tk.Frame(self.main_frame, bg="#2a2a2a", pady=5)
@@ -435,6 +481,9 @@ class Emprestimo(Base):
             parcelas = int(self.parcelas.get())
             
             if not (0 < valor <= 50000) or not (0 < parcelas <= 48):
+                """
+                Verifica se os valores estão dentro dos limites permitidos pelo banco.
+                """
                 raise ValueError("Valores fora do limite.")
             
             juros = 0.05
@@ -444,6 +493,9 @@ class Emprestimo(Base):
             confirm = messagebox.askyesno("Confirmar Empréstimo", f"Valor: R${valor:.2f}\nTotal a pagar: R${total_a_pagar:.2f}\n{parcelas}x de R${valor_parcela:.2f}\n\nDeseja contratar?")
             
             if confirm:
+                """
+                Verifica a confirmação do empréstimo e o registra no banco de dados.
+                """
                 database.atualizar_saldo(cpf, valor)
                 database.registrar_acao(cpf, "emprestimo", valor, f"Empréstimo contratado de R${valor:.2f}")
                 database.registrar_emprestimo(cpf, valor, total_a_pagar, parcelas, valor_parcela)
@@ -495,6 +547,9 @@ class PagarEmprestimo (Base):
         saldo_usuario = database.get_usuario(cpf)[4]
         
         if saldo_usuario < valor_pagar:
+            """
+            Verifica se o saldo do usuário é suficiente para pagar a parcela.
+            """
             messagebox.showerror("Erro", "Saldo insuficiente para pagar a parcela.")
             return
         
@@ -503,6 +558,9 @@ class PagarEmprestimo (Base):
         database.registrar_acao(cpf, "pagamento", -valor_pagar, f"Pagamento parcela empréstimo #{self.pagamento}")
         
         if self.emprestimo[6] + 1 == self.emprestimo[5]:
+            """
+            Verifica se todas as parcelas do empréstimo foram pagas.
+            """
             database.quitar_emprestimo(self.pagamento)
 
         messagebox.showinfo("Sucesso", "Parcela paga com sucesso!")
@@ -517,6 +575,9 @@ class PagarEmprestimo (Base):
         saldo_usuario = database.get_usuario(cpf)[4]
         
         if saldo_usuario < valor_quitar:
+            """
+            Verifica se o saldo do usuário é suficiente para quitar o empréstimo.
+            """
             messagebox.showerror("Erro", "Saldo insuficiente para quitar o empréstimo.")
             return
         
@@ -527,7 +588,9 @@ class PagarEmprestimo (Base):
         self.controller.show_frame("PaginaEmprestimos")
 
 class PaginaPix(Base):
-
+    """
+    Página para realizar operações com PIX.
+    """
     def setup_widgets(self):
 
         tk.Label(self, text="Área PIX", font=("Arial", 24, "bold"), bg="black", fg="red").pack(pady=(40, 20))
@@ -537,7 +600,9 @@ class PaginaPix(Base):
 
 
 class ChavePix(Base):
-
+    """
+    Página para gerenciar as chaves PIX do usuário.
+    """
     def setup_widgets(self):
         
         self.main_frame = tk.Frame(self, bg="black")
@@ -578,10 +643,15 @@ class ChavePix(Base):
         celular_frame.pack(fill="x", pady=(5,2))
 
     def cadastrar_chave(self, chave, tipo):
-        
+        """
+        Cadastra uma nova chave PIX para o usuário.
+        """
         cpf = self.controller.current_user_cpf
 
-        if not chave:
+        if not chave:  
+            """
+            Verifica se a chave está vazia.
+            """
             messagebox.showerror("Erro", "O campo não pode estar vazio.")
             return
         try:
@@ -592,23 +662,35 @@ class ChavePix(Base):
             messagebox.showerror("Erro", "Esta chave já está cadastrada no sistema.")
 
     def cadastrar_email(self):
-        
+        """
+        Cadastra o e-mail do usuário como chave PIX.
+        """
         self.cadastrar_chave(database.get_usuario(self.controller.current_user_cpf)[2], "E-mail")
     
     def cadastrar_cpf(self):
-
+        """
+        Cadastra o CPF do usuário como chave PIX.
+        """
         self.cadastrar_chave(self.controller.current_user_cpf, "CPF")
 
     def cadastrar_celular(self):
-        
+        """
+        Cadastra o número de celular do usuário como chave PIX.
+        """
         celular = self.celular_entry.get()
 
         if not celular.isdigit() or len(celular) < 10:
+            """
+            Verifica se o número digitado é válido para um celular.
+            """
             messagebox.showerror("Erro", "Número de celular inválido.")
             return
         self.cadastrar_chave(celular, "Celular")
-    def gerar_aleatoria(self):
 
+    def gerar_aleatoria(self):
+        """
+        Gera uma chave PIX aleatória e a cadastra.
+        """
         while True:
             chave = ''.join(random.choices(string.digits, k=6))
 
@@ -618,7 +700,9 @@ class ChavePix(Base):
 
 
 class TransferenciaPix(Base):
-
+    """
+    Página para enviar PIX.
+    """
     def setup_widgets(self):
 
         tk.Label(self, text="Enviar PIX", font=("Arial", 20), bg="black", fg="red").pack(pady=(40,15))
@@ -634,7 +718,9 @@ class TransferenciaPix(Base):
         tk.Button(self, text="Voltar", command=lambda: self.controller.show_frame("PaginaPix"), bg="grey", fg="white").pack()
     
     def enviar_pix(self):
-        
+        """ 
+        Envia um PIX para a chave digitada.
+        """
         cpf_origem = self.controller.current_user_cpf
         chave = self.chave.get()
         
@@ -645,12 +731,18 @@ class TransferenciaPix(Base):
             saldo_origem = database.get_usuario(cpf_origem)[4]
             
             if saldo_origem < valor:
+                """
+                Verifica se o saldo do usuário é suficiente para enviar o PIX.
+                """
                 messagebox.showerror("Erro", "Saldo insuficiente.")
                 return
             
             resultado = database.get_pix_destino(chave)
             
             if not resultado:
+                """
+                Verifica se a chave PIX de destino existe no banco de dados.
+                """
                 messagebox.showerror("Erro", "Chave PIX não encontrada.")
                 return
             
@@ -669,8 +761,11 @@ class TransferenciaPix(Base):
             messagebox.showerror("Erro", "Valor inválido.")
 
 class Cartoes(Base):
-
+    """
+    Página para gerenciar cartões digitais do usuário.
+    """
     def setup_widgets(self):
+
         self.main_frame = tk.Frame(self, bg="black")
         self.main_frame.pack(fill="both", expand=True)
         
@@ -702,7 +797,9 @@ class Cartoes(Base):
         tk.Button(self.main_frame, text="Gerar Novo Cartão de Crédito", command=lambda: self.gerar_cartao('credito'), bg="red", fg="white").pack(pady=10)
     
     def gerar_cartao(self, tipo):
-
+        """
+        Gera um novo cartão de crédito para o usuário.
+        """
         cpf = self.controller.current_user_cpf
         numero = "4" + "".join(random.choices(string.digits, k=15))
         validade = f"{random.randint(1,12):02d}/{random.randint(26, 30)}"
@@ -718,7 +815,9 @@ class Cartoes(Base):
 
 
 class Recarga(Base):
-    
+    """
+    Página para recarga de celular do usuário.
+    """
     def setup_widgets(self):
 
         tk.Label(self, text="Recarga de Celular", font=("Arial", 20), bg="black", fg="red").pack(pady=(40,15))
@@ -734,7 +833,9 @@ class Recarga(Base):
         tk.Button(self, text="Voltar", command=lambda: self.controller.show_frame("PainelUsuario"), bg="grey", fg="white").pack()
     
     def recarregar(self):
-
+        """
+        Realiza a recarga de celular do usuário.
+        """
         cpf = self.controller.current_user_cpf
         numero = self.numero_cel.get()
 
@@ -742,10 +843,16 @@ class Recarga(Base):
             valor = float(self.valor.get())
             
             if not numero.isdigit() or len(numero) not in [10, 11] or valor <= 0:
+                """
+                Verifica se o número de celular e o valor da recarga são válidos.
+                """
                 raise ValueError
             saldo_usuario = database.get_usuario(cpf)[4]
             
             if saldo_usuario < valor:
+                """
+                Verifica se o saldo do usuário é suficiente para realizar a recarga.
+                """
                 messagebox.showerror("Erro", "Saldo insuficiente.")
                 return
             
