@@ -694,7 +694,7 @@ class ChavePix(Base):
         while True:
             chave = ''.join(random.choices(string.digits, k=6))
 
-            if not database.check_chave_pix_exists(chave):
+            if not database.Checar_se_a_chave_existe(chave):
                 self.cadastrar_chave(chave, "Aleatória")
                 break
 
