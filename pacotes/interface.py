@@ -66,9 +66,7 @@ class Login(Base):
     Página de login do aplicativo.
     """
     def setup_widgets(self):
-    """
-    Configura os widgets da página de login...
-    """
+  
         tk.Label(self, text="Login", font=("Arial", 20), bg="black", fg="red").pack(pady=(40,15))
 
         tk.Label(self, text="CPF:", bg="black", fg="white").pack()
