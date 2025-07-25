@@ -5,7 +5,7 @@ THE CHAOS BANK:
 
 Pensem nele como um simulador de aplicativo de banco, tipo esses que a gente usa no celular, só que feito pra rodar direto no computador.
 
-Feito em python pra programar tudo, a interface gráfica foi feita com Tkinter, que já vem com o Python, e pra guardar os dados, como saldo e transações, eu usamos um banco de dados SQLite.  
+Feito em python pra programar tudo, a interface gráfica foi feita com Tkinter, que já vem com o Python, e pra guardar os dados, como saldo e transações, usamos um banco de dados SQLite.  
 
 Então com isso, apresentamos as principais funcionalidades mais importantes que se encontra atualmente em um banco digital. Essas são as funcionalidades de forma resumida:
 
@@ -21,27 +21,6 @@ Empréstimos e Cartão Virtual: O sistema permite que você peça um empréstimo
 
 Outros Serviços: Pra fechar, colocamos uma função de recarga de celular e, pra cada transação importante, o sistema gera uma janelinha de comprovante na hora.
 
-E aí, pessoal! Beleza?
-
-Hoje eu vou apresentar pra vocês o meu projeto, o Chaos Bank. Pensem nele como um simulador de aplicativo de banco, tipo esses que a gente usa no celular, só que feito pra rodar direto no computador.
-
-Eu usei Python pra programar tudo, a interface gráfica foi feita com Tkinter, que já vem com o Python, e pra guardar os dados de todo mundo, como saldo e transações, eu usei um banco de dados SQLite.
-
-Beleza, mas o que ele faz?
-Então, eu tentei colocar as funcionalidades mais importantes que a gente vê nos bancos digitais por aí. Se liga só no que dá pra fazer:
-
-Login e Segurança: Primeiro de tudo, você pode criar sua conta e fazer o login. Pra garantir a segurança, a senha de vocês não fica salva como texto puro, ela vira um "hash" usando o algoritmo SHA256. E se esquecer a senha, relaxa! Tem um sistema de recuperação que manda um código pro seu e-mail de verdade (eu usei o protocolo SMTP do Google pra isso).
-
-Painel Principal: Depois de logar, você cai numa tela principal que tem os botões pra acessar todas as outras funções. É o nosso ponto de partida.
-
-Ver a Grana e o Histórico: Tem uma tela pra ver o saldo e o extrato completo, com todas as transferências, PIX, pagamentos e empréstimos que você fez, tudo em ordem de data.
-
-PIX, é claro!: Dá pra mandar dinheiro usando uma chave PIX e também gerenciar suas próprias chaves. Você pode cadastrar seu CPF, e-mail ou gerar chaves aleatórias pra receber dinheiro.
-
-Empréstimos e Cartão Virtual: O sistema permite que você peça um empréstimo (com cálculo de juros e tudo mais) e depois te dá a opção de pagar as parcelas ou quitar a dívida toda. Além disso, dá pra gerar um cartão de crédito virtual, com número, validade e CVV.
-
-Outros Serviços: Pra fechar, coloquei uma função de recarga de celular e, pra cada transação importante, o sistema gera uma janelinha de comprovante na hora.
-
 COMO O CODIGO FOI ORGANIZADO?
 
 Separamos o projeto de forma modular, cada um com sua responsabilidade:
@@ -54,3 +33,7 @@ utils.py: É a principio "caixa de ferramentas". Colocamos aqui as funções em 
 
 config.py: Pra não deixar informações sensíveis, como senhas de e-mail, jogadas no meio do código, criamos esse arquivo de configuração. só precisamos mexer aqui pra o sistema funcionar em outro computador.
 
+interface.py: É a parte visual. Todas as telas (login, extrato, etc.) são definidas aqui como classes separadas. Ele contém todos os botões, campos de texto e a lógica de interação do usuário.
+
+autores: Luan Victor
+         Matheus Morais
