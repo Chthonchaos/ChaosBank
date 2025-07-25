@@ -140,7 +140,7 @@ def get_chaves_pix(cpf):
     return c.fetchall()
 
 # Função para verificar se uma chave Pix já existe
-def check_chave_pix_exists(chave):
+def Checar_se_a_chave_existe(chave):
     c.execute("SELECT chave FROM chaves_pix WHERE chave = ?", (chave,))
     return c.fetchone() is not None
     

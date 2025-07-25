@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw
 
+# Importando pacotes e módulos necessários
 from pacotes import database
 from pacotes.interface import (
     PaginaInicial, 
@@ -26,6 +27,7 @@ from pacotes.interface import (
 )
 from pacotes import utils
 
+# Classe principal do aplicativo Chaos Bank
 class ChaosBank(tk.Tk):
     """
     Classe principal do aplicativo Chaos Bank.
@@ -81,6 +83,7 @@ class ChaosBank(tk.Tk):
             frame.on_show(data)
         frame.tkraise()
 
+# Função para verificar se o usuário está logado
 if __name__ == '__main__':
     """
     Inicializa o banco de dados e a aplicação.

@@ -10,16 +10,19 @@ from datetime import datetime
 from pacotes import database
 from pacotes.config import EMAIL_SENDER, EMAIL_PASSWORD
 
+# Função para gerar um hash para a senha
 def hash_senha(senha):
     "Gera um hash  para a senha."
     return hashlib.sha256(senha.encode()).hexdigest()
 
+# Função para mascarar o CPF
 def mask_cpf(cpf):
     "Esconde o CPF."
     if isinstance(cpf, str) and len(cpf) == 11 and cpf.isdigit():
         return f"{cpf[:3]}.XXX.XXX-{cpf[9:]}"
     return cpf
 
+# Função para gerar um código de recuperação
 def gerar_comprovante(janela_pai, tipo_transacao, valor, origem_cpf, destino_info, sucesso=True):
     "Cria uma nova janela para exibir um comprovante de transação."
     comprovante_window = Toplevel(janela_pai)
@@ -98,3 +101,4 @@ Equipe ChaosBank
         print(f"ERRO AO ENVIAR E-MAIL: {e}")
         messagebox.showerror("Erro de Envio", "Não foi possível enviar o e-mail de recuperação.")
         return False
+    
