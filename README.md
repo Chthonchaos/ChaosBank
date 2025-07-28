@@ -1,6 +1,8 @@
 # ChaosBank
 Projeto de I.P. IFPE - Paulista
-
+Autores: Luan Victor
+         Matheus de Morais
+         
 THE CHAOS BANK:
 
 Pensem nele como um simulador de aplicativo de banco, tipo esses que a gente usa no celular, só que feito pra rodar direto no computador.
@@ -9,7 +11,7 @@ Feito em python para programar tudo, a interface gráfica foi feita com Tkinter,
 
 Então com isso, apresentamos as principais funcionalidades mais importantes que se encontra atualmente em um banco digital. Essas são as funcionalidades de forma resumida:
 
-Login e Segurança: Primeiro de tudo, você pode criar sua conta e fazer o login. Pra garantir a segurança, a senha de vocês não fica salva como texto puro, ela vira um "hash" usando o algoritmo SHA256. e se caso esquecer a senha, Tem um sistema de recuperação que manda um código pro seu e-mail funcional ( Somente fuciona caso tenha um servidor para rodar o programa ).
+Login e Segurança: Primeiro de tudo, você pode criar sua conta e fazer o login. Pra garantir a segurança, a senha de vocês não fica salva como texto puro, ela vira um "hash" usando o algoritmo SHA256.
 
 Painel Principal: Depois de logar, você cai numa tela principal que tem os botões pra acessar todas as outras funções do programa.
 
@@ -25,7 +27,7 @@ COMO O CODIGO FOI ORGANIZADO?
 
 Separamos o projeto de forma modular, cada um com sua responsabilidade:
 
-principal.py: É o arquivo que se executa pra iniciar o programa. Ele cria a janela principal e controla qual tela vai aparecer.
+main.py: É o arquivo que se executa pra iniciar o programa. Ele cria a janela principal e controla qual tela vai aparecer.
 
 database.py: Esse aqui é o que irá criar as tabelas do banco de dados ou alteralas. Qualquer uma das funções como "pegar o extrato do usuário" ou "registrar um novo empréstimo", é uma função aqui dentro que faz a consulta ou a alteração no banco de dados SQLite. fizemos a deixar toda a lógica de SQL separada nesse arquivo pra organizar melhor.
 
@@ -33,7 +35,5 @@ utils.py: É a principio "caixa de ferramentas". Colocamos aqui as funções em 
 
 config.py: Pra não deixar informações sensíveis, como senhas e e-mail, jogadas no meio do código, criamos esse arquivo de configuração. só precisamos mexer aqui pra o sistema funcionar em outro computador.
 
-interface.py: É a parte visual. Todas as telas (login, extrato, etc.) são definidas aqui como classes separadas. Ele contém todos os botões, campos de texto e a lógica de interação do usuário.
+interface: É a parte visual. Todas as telas (login, extrato, etc.) são definidas aqui como classes separadas. Ele contém todos os botões, campos de texto e a lógica de interação do usuário.
 
-autores: Luan Victor
-         Matheus Morais
