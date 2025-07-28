@@ -1,5 +1,5 @@
 # ChaosBank
-projeto de IP
+Projeto de I.P. IFPE - Paulista
 
 THE CHAOS BANK:
 
