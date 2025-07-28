@@ -1,7 +1,7 @@
 # ChaosBank
 Projeto de I.P. IFPE - Paulista
-Autores: Luan Victor
-         Matheus de Morais
+
+Autores: Luan Victor e Matheus de Morais
          
 THE CHAOS BANK:
 
