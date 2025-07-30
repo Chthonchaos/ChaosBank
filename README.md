@@ -1,5 +1,5 @@
 # ChaosBank
-Projeto de I.P. IFPE - Paulista
+projeto de IP
 
 Autores: Luan Victor e Matheus de Morais
          

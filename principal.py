@@ -1,32 +1,33 @@
-# Arquivo: principal.py
-# Autores: Matheus de Morais, Luan Victor
+#Arquivo: principal.py
+#Autores: Matheus de Morais, Luan Victor
 
-# Bibliotecas
+#Bibliotecas e Módulos
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw
 
-# Importa as classes e módulos
-from pacotes.utils import hash_senha, mask_cpf, gerar_comprovante
-import pacotes.database
+# Importando pacotes e módulos necessários
 from pacotes import database
-from pacotes.database import (
-    setup_database,
-    get_usuario,
-    get_usuario_por_email,
-    get_extrato,
-    get_emprestimos_ativos,
-    get_emprestimo_por_id,
-    registrar_acao,
-    atualizar_saldo,
-    registrar_novo_usuario,
-    registrar_emprestimo,
-    atualizar_emprestimo_pago,
-    quitar_emprestimo,
-    close_connection
+from pacotes.interface import (
+    PaginaInicial, 
+    Login, 
+    Cadastro, 
+    RecuperacaoSenha, 
+    PainelUsuario, 
+    Extrato, 
+    Transferencia, 
+    Emprestimo, 
+    PagarEmprestimo,
+    PaginaEmprestimos,
+    PaginaPix,
+    ChavePix,
+    TransferenciaPix,
+    Cartoes,
+    Recarga
 )
-from interface import *
+from pacotes import utils
 
+# Classe principal do aplicativo Chaos Bank
 class ChaosBank(tk.Tk):
     """
     Classe principal do aplicativo Chaos Bank.
@@ -35,7 +36,7 @@ class ChaosBank(tk.Tk):
 
         super().__init__(*args, **kwargs)
 
-        self.logo_image = self.criar_logo()
+        self.logo_image = self.create_logo()
         if self.logo_image:
             self.iconphoto(False, self.logo_image)
         
@@ -51,7 +52,7 @@ class ChaosBank(tk.Tk):
         self.current_user_cpf = None
 
         frame_classes = [
-            PaginaInicial, Login, Cadastro, PainelUsuario,
+            PaginaInicial, Login, Cadastro, RecuperacaoSenha, PainelUsuario,
             Extrato, Transferencia, Emprestimo, PagarEmprestimo, PaginaEmprestimos, 
             PaginaPix, ChavePix, TransferenciaPix, Cartoes, Recarga,
         ]
@@ -65,9 +66,9 @@ class ChaosBank(tk.Tk):
 
         self.show_frame("PaginaInicial")
 
-    def criar_logo(self):
+    def create_logo(self):
         """
-        Cria a logo do aplicativo na PaginaInicial.
+        Cria a logo do aplicativo.
         """
         image = Image.new("RGB", (64, 64), "black")
         draw = ImageDraw.Draw(image)
@@ -82,6 +83,7 @@ class ChaosBank(tk.Tk):
             frame.on_show(data)
         frame.tkraise()
 
+# Função para verificar se o usuário está logado
 if __name__ == '__main__':
     """
     Inicializa o banco de dados e a aplicação.
@@ -89,7 +91,7 @@ if __name__ == '__main__':
     database.setup_database()
     app = ChaosBank()
 
-    """Função para quando fechar a janela pedir a confirmação do usuário."""
+    """Função para quando fechar a janela."""
     def on_closing():
 
         if messagebox.askokcancel("Sair", "Deseja sair do Chaos Bank?"):

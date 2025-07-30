@@ -5,7 +5,7 @@
 import sqlite3
 from pacotes import config
 
-# Conexão com o banco de dados segundo o configurado em config.py
+
 conn = sqlite3.connect(config.DB_NAME)
 c = conn.cursor()
 
@@ -103,6 +103,25 @@ def atualizar_emprestimo_pago(pagamento, valor_pago):
 def quitar_emprestimo(pagamento):
 
     c.execute("UPDATE emprestimos SET valor_pago = valor_total_a_pagar, parcelas_pagas = parcelas_totais, status = 'QUITADO' WHERE id = ?", (pagamento,))
+    conn.commit()
+
+#  Função para verificar se o usuário já está cadastrado 
+def salvar_codigo_recuperacao(email, code):
+
+    c.execute("UPDATE usuarios SET recovery_code = ? WHERE email = ?", (code, email))
+    conn.commit()
+
+# Função para verificar se o código de recuperação é válido
+def verificar_codigo_recuperacao(email, code):
+
+    c.execute("SELECT cpf FROM usuarios WHERE email = ? AND recovery_code = ?", (email, code))
+    return c.fetchone() is not None
+
+
+# Função para redefinir a senha do usuário
+def redefinir_senha(email, senha_hash):
+
+    c.execute("UPDATE usuarios SET senha = ?, recovery_code = NULL WHERE email = ?", (senha_hash, email))
     conn.commit()
 
 # Função para buscar os cartões de um usuário

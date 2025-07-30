@@ -8,6 +8,7 @@ import ssl
 from tkinter import Toplevel, Frame, Label, Button, messagebox
 from datetime import datetime
 from pacotes import database
+from pacotes.config import EMAIL_SENDER, EMAIL_PASSWORD
 
 # Função para gerar um hash para a senha
 def hash_senha(senha):
@@ -21,7 +22,7 @@ def mask_cpf(cpf):
         return f"{cpf[:3]}.XXX.XXX-{cpf[9:]}"
     return cpf
 
-# Função para gerar um comprovante de transação
+# Função para gerar um código de recuperação
 def gerar_comprovante(janela_pai, tipo_transacao, valor, origem_cpf, destino_info, sucesso=True):
     "Cria uma nova janela para exibir um comprovante de transação."
     comprovante_window = Toplevel(janela_pai)
@@ -66,3 +67,38 @@ def gerar_comprovante(janela_pai, tipo_transacao, valor, origem_cpf, destino_inf
 
     Label(comprovante_window, text=f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}", font=("Arial", 8), bg="white").pack(pady=10)
     Button(comprovante_window, text="Fechar", command=comprovante_window.destroy, bg="grey", fg="white").pack(pady=5)
+
+def send_recovery_email(dest_email, nome_cliente, recovery_code):
+    "Envia um e-mail de recuperação de senha usando as credenciais do config."
+    assunto = "Comunicado Importante: Sua Recuperação de Acesso no ChaosBank"
+    corpo_template = f"""Prezado(a) {nome_cliente},
+
+Esperamos que este e-mail o(a) encontre bem.
+
+Nós, do ChaosBank, estamos entrando em contato para fornecer o código de validação para sua recente solicitação de recuperação de senha.
+
+Sua segurança e a eficiência dos nossos serviços são nossa prioridade. Para prosseguir com a criação de uma nova senha, utilize o código exclusivo fornecido abaixo.
+
+Seu Código ChaosBank:
+
+{recovery_code}
+
+Instruções:
+
+Por favor, utilize este código no campo indicado em nosso aplicativo dentro dos próximos 15 minutos.
+
+Atenciosamente,
+Equipe ChaosBank
+"""
+    message = f"Subject: {assunto}\n\n{corpo_template}"
+    context = ssl.create_default_context()
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_SENDER, dest_email, message.encode('utf-8'))
+        return True
+    except Exception as e:
+        print(f"ERRO AO ENVIAR E-MAIL: {e}")
+        messagebox.showerror("Erro de Envio", "Não foi possível enviar o e-mail de recuperação.")
+        return False
+    
